@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SistemaInventario.AccesoDatos.Data;
 using SistemaInventario.AccesoDatos.Repositorio.IRepositorio;
-using SistemaInventario.AccesoDatos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,97 +11,87 @@ using System.Threading.Tasks;
 namespace SistemaInventario.AccesoDatos.Repositorio
 {
     public class Repositorio<T> : IRepositorio<T> where T : class
-
     {
-        //Acceso a los datos es decir la conexion de la DB 
+        //Acceso a los datos es decir de la conexion de la BD
         private readonly ApplicationDbContext _db;
 
-
-
-        //Necesitamos mandar el conjunto de datos a travez de una variable
+        //necesitamos mandar el conjunto de datos a travez de una variable
         internal DbSet<T> dbSet;
-        private ApplicationDbContext db;
 
-        public Repositorio(ApplicationDbContext db, DbSet<T> dbSet)
+        public Repositorio(ApplicationDbContext db)
         {
             _db = db;
             this.dbSet = _db.Set<T>();
         }
 
-        public Repositorio(ApplicationDbContext db)
+        public async Task Agregar(T entidad)
         {
-            this.db = db;
+            await dbSet.AddAsync(entidad); //insert into table
         }
 
         public async Task<T> Obtener(int id)
         {
-            return await dbSet.FindAsync(id); //Select * from where id = id
+            return await dbSet.FindAsync(id); //select * from where id = id
         }
 
-        public async Task<IEnumerable<T>> ObtenerTodos(Expression<Func<T, bool>> filtro = null, Func<IQueryable<T>, IOrderedQueryable<T>> OrdeBy = null, string incluirPropiedades = null, bool isTracking = true)
+        public async Task<IEnumerable<T>> ObtenerTodos(Expression<Func<T, bool>> filtro = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string incluirPropiedades = null, bool isTracking = true)
         {
             IQueryable<T> query = dbSet;
-            if (filtro == null)
+            if (filtro != null)
             {
-                query = query.Where(filtro); //Select * from table
+                query = query.Where(filtro); //selec * from table
             }
-
             if (incluirPropiedades != null)
             {
+                //"Categoria, Marca, ...."
                 foreach (var incluirProp in incluirPropiedades.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
                     query = query.Include(incluirProp); //Marca, Categoria
                 }
+
             }
 
-            if (OrdeBy != null)
+            if (orderBy != null)
             {
-                query = OrdeBy(query);
+                query = orderBy(query);
             }
-            if (isTracking)
+
+            if (!isTracking)
             {
                 query = query.AsNoTracking();
             }
             return await query.ToListAsync();
-
         }
 
         public async Task<T> ObtenerPrimero(Expression<Func<T, bool>> filtro = null, string incluirPropiedades = null, bool isTracking = true)
         {
             IQueryable<T> query = dbSet;
-            if (filtro == null)
+            if (filtro != null)
             {
-                query = query.Where(filtro); //Select * from table
+                query = query.Where(filtro); //selec * from table
             }
-
             if (incluirPropiedades != null)
             {
+                //"Categoria, Marca, ...."
                 foreach (var incluirProp in incluirPropiedades.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
                 {
                     query = query.Include(incluirProp); //Marca, Categoria
                 }
+
             }
 
-
-            if (isTracking)
+            if (!isTracking)
             {
                 query = query.AsNoTracking();
             }
             return await query.FirstOrDefaultAsync();
-
         }
 
-        public async Task Agregar(T entidad)
-        {
-            await dbSet.AddAsync(entidad);
-        }
 
         public void Remover(T entidad)
         {
-            dbSet.Remove(entidad); //Delete
+            dbSet.Remove(entidad);
         }
-
-       
 
         public void RemoverRango(IEnumerable<T> entidad)
         {
@@ -109,17 +99,3 @@ namespace SistemaInventario.AccesoDatos.Repositorio
         }
     }
 }
-
-       
-
-        
-
-
-        
-
-      
-
-
-        
-    
-

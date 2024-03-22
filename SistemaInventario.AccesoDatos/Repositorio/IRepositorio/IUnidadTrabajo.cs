@@ -8,10 +8,8 @@ namespace SistemaInventario.AccesoDatos.Repositorio.IRepositorio
 {
     public interface IUnidadTrabajo : IDisposable
     {
-        //Se ira actualizando mientras mas se avance en el proyecto
-        IBodegaRepositorio Bodega {  get; }
+        IBodegaRepositorio Bodega { get; }
 
         Task Guardar();
-
     }
 }

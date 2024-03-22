@@ -3,21 +3,17 @@ using Microsoft.EntityFrameworkCore;
 using SistemaInventario.Modelos;
 using System.Reflection;
 
-namespace SistemaInventario.AccesoDatos
+namespace SistemaInventario.AccesoDatos.Data;
+
+public class ApplicationDbContext : IdentityDbContext
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+    public DbSet<Bodega> Bodegas { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-        {
-
-        }
-        public DbSet<Bodega> Bodegas { get; set; }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-        }
-
+        base.OnModelCreating(builder);
+        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
+
 }
