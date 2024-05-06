@@ -7,10 +7,10 @@ using SistemaInventario.Utilidades;
 namespace Sistema_de_Inventario.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    public class BodegaController : Controller
+    public class CategoriaController : Controller
     {
         private readonly IUnidadTrabajo _unidadTrabajo;
-        public BodegaController(IUnidadTrabajo unidadTrabajo)
+        public CategoriaController(IUnidadTrabajo unidadTrabajo)
         {
             _unidadTrabajo = unidadTrabajo;
         }
@@ -22,54 +22,54 @@ namespace Sistema_de_Inventario.Areas.Admin.Controllers
         //Metodo Upsert GET
         public async Task<IActionResult> Upsert(int? id)
         {
-            Bodega bodega = new Bodega();
+            Categoria categoria = new Categoria();
             if (id == null)
             {
                 //creamos un nuevo registro
-                bodega.Estado = true;
-                return View(bodega);
+                categoria.Estado = true;
+                return View(categoria);
 
             }
-            bodega = await _unidadTrabajo.Bodega.Obtener(id.GetValueOrDefault());
-            if (bodega == null)
+            categoria = await _unidadTrabajo.Categoria.Obtener(id.GetValueOrDefault());
+            if (categoria == null)
             {
                 return NotFound();
             }
-            return View(bodega);
+            return View(categoria);
         }
         //Agregar y Actualizar
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upsert(Bodega bodega)
+        public async Task<IActionResult> Upsert(Categoria categoria)
         {
             if (ModelState.IsValid)
             {
-                if (bodega.Id == 0)
+                if (categoria.Id == 0)
                 {
-                    await _unidadTrabajo.Bodega.Agregar(bodega);
+                    await _unidadTrabajo.Categoria.Agregar(categoria);
                 }
                 else
                 {
-                    _unidadTrabajo.Bodega.Actualizar(bodega);
+                    _unidadTrabajo.Categoria.Actualizar(categoria);
                 }
                 await _unidadTrabajo.Guardar();
                 return RedirectToAction(nameof(Index));
             }
-            return View(bodega);
+            return View(categoria);
         }
 
         //Eliminar
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            var bodegaDB = await _unidadTrabajo.Bodega.Obtener(id);
-            if (bodegaDB == null)
+            var categoriaDB = await _unidadTrabajo.Categoria.Obtener(id);
+            if (categoriaDB == null)
             {
                 return Json(new { success = false, message = "Error al Borrar el Registro en la base de datos." });
             }
-            _unidadTrabajo.Bodega.Remover(bodegaDB);
+            _unidadTrabajo.Categoria.Remover(categoriaDB);
             await _unidadTrabajo.Guardar();
-            return Json(new { success = true, message = "Bodega Eliminada con Exito" });
+            return Json(new { success = true, message = "Categoria Eliminada con Exito" });
         }
 
 
@@ -77,7 +77,7 @@ namespace Sistema_de_Inventario.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> ObtenerTodos()
         {
-            var todos = await _unidadTrabajo.Bodega.ObtenerTodos();
+            var todos = await _unidadTrabajo.Categoria.ObtenerTodos();
             return Json(new { data = todos });
         }
 
@@ -86,7 +86,7 @@ namespace Sistema_de_Inventario.Areas.Admin.Controllers
         public async Task<IActionResult> ValidarNombre(string nombre, int id = 0)
         {
             bool valor = false;
-            var lista = await _unidadTrabajo.Bodega.ObtenerTodos();
+            var lista = await _unidadTrabajo.Categoria.ObtenerTodos();
 
             if (id == 0)
             {
