@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SistemaInventario.AccesoDatos.Data;
 using SistemaInventario.AccesoDatos.Repositorio.IRepositorio;
+using SistemaInventario.Modelos.Especificaciones;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -96,6 +97,33 @@ namespace SistemaInventario.AccesoDatos.Repositorio
         public void RemoverRango(IEnumerable<T> entidad)
         {
             dbSet.RemoveRange(entidad);
+        }
+
+        public PageList<T> ObtenerTodosPaginado(Parametros parametros, Expression<Func<T, bool>> filtro = null, Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null, string incluirPropiedades = null, bool isTracking = true)
+        {
+            IQueryable<T> query = dbSet;
+            if (filtro != null)
+            {
+                query = query.Where(filtro);
+            }
+            if(orderBy != null)
+            {
+                foreach (var incluirProp in incluirPropiedades.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(incluirProp); //Marca, Categoria
+                }
+            }
+
+            if (orderBy != null)
+            {
+                query = orderBy(query);
+            }
+
+            if (!isTracking)
+            {
+                query = query.AsNoTracking();
+            }
+            return PageList<T>.ToPagesList(query,parametros.PageNumber, parametros.PageSize);
         }
     }
 }
